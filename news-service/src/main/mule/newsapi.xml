@@ -129,10 +129,63 @@ output application/json
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{
-  errorCode: 404,
-  description: "Resource Not found"
-} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+[
+  {
+    newsId: 10234,
+    newsHeadline: "Corona Virus Spreading",
+    newsDetails: "Corona Virus Spreading",
+    reporterName: "Ruchi Saini",
+    newsType: "General",
+    newsAgency: {
+      agencyName: "USA Agency",
+      country: "USA"
+    }
+  },
+  {
+    newsId: 20456,
+    newsHeadline: "Global Economy Update",
+    newsDetails: "Markets show mixed signals",
+    reporterName: "John Smith",
+    newsType: "Business",
+    newsAgency: {
+      agencyName: "Global News",
+      country: "UK"
+    }
+  },
+  {
+    newsId: 30987,
+    newsHeadline: "Tech Innovations 2026",
+    newsDetails: "AI continues to grow rapidly",
+    reporterName: "Anita Verma",
+    newsType: "Technology",
+    newsAgency: {
+      agencyName: "Tech Daily",
+      country: "India"
+    }
+  },
+  {
+    newsId: 45678,
+    newsHeadline: "Sports Championship",
+    newsDetails: "Final match highlights",
+    reporterName: "Mike Ross",
+    newsType: "Sports",
+    newsAgency: {
+      agencyName: "ESPN",
+      country: "USA"
+    }
+  },
+  {
+    newsId: 56789,
+    newsHeadline: "Climate Change Alert",
+    newsDetails: "Rising global temperatures",
+    reporterName: "Sara Lee",
+    newsType: "Environment",
+    newsAgency: {
+      agencyName: "BBC",
+      country: "UK"
+    }
+  }
+] ]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>
@@ -148,7 +201,7 @@ output application/json
 output application/json
 ---
 {
-  newsId: "n1",
+  newsId: vars.newsId,
   newsHeadline: "Corona Virus Spreading",
   newsDetails: "Corona Virus Spreading",
   reporterName: "Ruchi Saini",
