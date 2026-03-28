@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<flow name="dbpoolingFlow1" doc:id="a85ab2d9-bb53-4b67-8639-7aeafcdab036" >
+		<scheduler doc:name="Scheduler" doc:id="57ffa824-e38c-4255-bec1-f222b434c37b" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<os:retrieve doc:name="Retrieve" doc:id="47ad9a5c-43ac-4ff5-8d37-fcca2d8d6930" key="product_id" target="maxpid">
+			<os:default-value ><![CDATA[0]]></os:default-value>
+		</os:retrieve>
+		<db:select doc:name="Select" doc:id="28ab79ea-5a73-4dc1-86ad-4c74b73ba8fa" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from product where product_id > :pid]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	pid: vars.maxpid
+}]]]></db:input-parameters>
+		</db:select>
+		<choice doc:name="Choice" doc:id="a365cb04-38ee-4a9b-8727-230376288d97" >
+			<when expression="#[sizeOf(payload) &gt; 0]">
+				<ee:transform doc:name="Transform Message" doc:id="2eb0ffac-b601-48ad-b09a-28d02fdedf71" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="78e2ea6d-68fa-4391-9035-0589fff2d12a" message="New Record Exists"/>
+				<os:store doc:name="Store" doc:id="b0cf2037-87a5-4f04-bd00-78c1c6bcbad6" key="product_id">
+					<os:value ><![CDATA[#[max(payload.product_id)]]]></os:value>
+				</os:store>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="4aa09265-579c-4188-8f69-d9ba64b5bbfa" message="No New Record"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="dbpoolingFlow" doc:id="527ca00e-fa41-4274-8c3d-4f4d23c887c3" initialState="stopped">
+		<db:listener doc:name="On Table Row" doc:id="a0d7c1c4-544c-4f62-b79a-ce29ed4aa0aa" config-ref="Database_Config" table="product" watermarkColumn="product_id" idColumn="product_id">
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</db:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="02ee2e69-cca7-4a26-a896-01eea3564757" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="cf5037a6-8e37-4ed4-a7df-8de9a2f00fc5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

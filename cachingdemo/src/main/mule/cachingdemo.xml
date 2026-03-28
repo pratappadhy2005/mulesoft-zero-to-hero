@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<ee:object-store-caching-strategy name="Product_Strategy" doc:name="Caching Strategy" doc:id="435947b3-5145-43c2-affb-e6d69c47e730" keyGenerationExpression="#[attributes.queryParams.pid]" >
+		<os:private-object-store alias="productstore" />
+	</ee:object-store-caching-strategy>
+	<flow name="cachingdemoFlow" doc:id="05ff1156-41e8-44df-8781-7616996b01dd" >
+		<http:listener doc:name="Listener" doc:id="342f7d83-4f64-4a92-ae29-b947e43f9d64" config-ref="HTTP_Listener_config" path="/products"/>
+		<ee:cache doc:name="Cache" doc:id="331fbfa0-bb1f-4bf8-b3e4-43b0c9421158" cachingStrategy-ref="Product_Strategy">
+			<db:select doc:name="Select" doc:id="e18cb284-64fd-4da0-a237-544236b664a9" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from product where product_id=:pid]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	pid: attributes.queryParams.pid
+}]]]></db:input-parameters>
+		</db:select>
+			<logger level="INFO" doc:name="Logger" doc:id="8a6b044e-6552-4d3e-b3e1-4362230636c1" category="Inside select to query the DB"/>
+		</ee:cache>
+		<ee:transform doc:name="Transform Message" doc:id="b314f54d-53eb-4f14-bba3-7723f03d35f9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

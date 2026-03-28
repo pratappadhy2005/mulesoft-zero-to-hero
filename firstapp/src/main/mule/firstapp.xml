@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="firstappFlow" doc:id="7e677616-3a90-4dd3-9c01-f694dc4167f7" >
+		<http:listener doc:name="Listener" doc:id="129765b2-4020-4bd2-ba3a-dc47ee9414ab" path="/hello/{city}" config-ref="HTTP_Listener_config_v2">
+			<http:response statusCode="#[vars.statusCode default 200]">
+				<http:headers ><![CDATA[#[vars.responseHeaders default {}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<set-variable value="#[attributes.queryParams.userName]" doc:name="Set Variable" doc:id="5b13d787-6880-47ed-9b9e-98e269e91c3a" variableName="user"/>
+		<set-variable value="#[attributes.uriParams.city]" doc:name="Set Variable" doc:id="56c36927-24a5-4e1f-b4e7-3ba6c9a2dfef" variableName="city"/>
+		<set-variable value="#[{&#10;	x: 1,&#10;	y: 2&#10;}]" doc:name="Set Variable" doc:id="cc8cfa65-e45d-40be-b62f-54ded7b91beb" variableName="responseHeaders"/>
+		<set-variable value="200" doc:name="Set Variable" doc:id="52f0be7b-4bd2-4e9f-9ba0-5494f6a34d84" variableName="statusCode"/>
+		<set-payload value="#['Hello World' ++ (attributes.queryParams.userName as String default ' World')&#10;++ 'URI Param' ++ (vars.city as String  default 'Mumbai')]" doc:name="Set Payload" doc:id="1f0e3724-f905-4e75-94e9-591245329f74" mimeType="text/plain"/>
+		<logger level="INFO" doc:name="Logger" doc:id="730b5cc2-827e-4e81-9ba6-b85eb2726c27" message="#['payload is ' ++ payload]"/>
+	</flow>
+	
+</mule>

@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_65912953_f7d4_457d_90fc_9af53107f5d8_Output_Payload = Array<{|  product_id: Number,   brand_name?: String,   description?: String,   name?: String,   offer_price: Number,   offer_valid_until?: Date,   original_price: Number|}>
+

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="mainflow" doc:id="9dff49a7-eb3e-4ec6-a4bc-3e9854403bb2" >
+		<http:listener doc:name="Listener" doc:id="58dd7775-079e-4406-9fa9-03c974fd4091" config-ref="HTTP_Listener_config" path="/products"/>
+		<choice doc:name="Choice" doc:id="5319b62f-983b-4e65-8e58-97642bdbce03" >
+			<when expression="#[attributes.queryParams.brand == null and attributes.method == 'GET']">
+				<flow-ref doc:name="getallproducts" doc:id="94f60550-49c4-42bb-bfab-a085c7a08c08" name="getallproducts" />
+			</when>
+			<when expression="#[attributes.queryParams.brand != null and attributes.method == 'GET']">
+				<set-variable value="#[attributes.queryParams.brand]" doc:name="Set Brand Name" doc:id="c95d6f05-3d57-4e94-9e78-417ee335ca4f" variableName="brand"/>
+				<flow-ref doc:name="Flow Reference" doc:id="52791db5-7626-4888-8481-5741c688a550" name="getproductsbyname"/>
+			</when>
+			<otherwise>
+				<set-payload value="Invalid Request" doc:name="Set Payload" doc:id="5e123a9c-5ba4-4c7e-acc0-496c1eb1c648" />
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="c3013f22-cfb4-4ba2-944c-41d56576f1e4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getallproducts" doc:id="65912953-f7d4-457d-90fc-9af53107f5d8" >
+		<db:select doc:name="Select All Products" doc:id="0781aa46-fbbe-4b35-8dd9-8061b7dc12c3" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from product]]></db:sql>
+		</db:select>
+	</flow>
+	<flow name="getproductsbyname" doc:id="94e18f6e-1d28-4b9a-9f18-fb8e0aa6073c" >
+		<db:select doc:name="SelectProductByBrand" doc:id="02ebe964-d70e-4ed2-94d8-c300dcb9fb98" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from product where brand_name = :brand]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+
+	brand : vars.brand
+}]]]></db:input-parameters>
+		</db:select>
+	</flow>
+</mule>

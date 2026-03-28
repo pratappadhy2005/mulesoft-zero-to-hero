@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="860f6f54-810a-4d05-a022-35e224caf206" basePath="/" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="mainflow" doc:id="649999fc-0f26-41c8-8046-c31c756f7eb1" >
+		<http:listener doc:name="Main Flow" doc:id="a7db8ec8-09c0-4d7c-944f-17c3f21ea0fb" config-ref="HTTP_Listener_config" path="/myproducts"/>
+		<choice doc:name="Choice" doc:id="fb67ae38-d79d-4a0d-9b21-43bf860bc35d" >
+			<when expression="#[attributes.method == 'GET' and attributes.queryParams.productname == null]">
+				<flow-ref doc:name="Flow Reference" doc:id="74129f10-f9c6-4e11-898b-8caefe35bdf5" name="getallproducts"/>
+			</when>
+			<when expression="attributes.method == 'GET' and attributes.queryParams.productname != null">
+				<set-variable value="#[attributes.queryParams.productname]" doc:name="Set Variable" doc:id="cf6f7eb1-6ae0-4374-a08c-cce5cef54fa1" variableName="pname"/>
+				<flow-ref doc:name="Flow Reference1" doc:id="3b9de737-01f3-449d-8014-5d97f3d83731" name="getproductsbyname" />
+			</when>
+			<otherwise>
+				<set-payload value="Invalid request" doc:name="Set Payload" doc:id="a80e5b61-90e0-49a6-8ec5-8bec3cd5e5f9" />
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getallproducts" doc:id="332a492d-e3d4-4149-949b-78898f35bc1e" >
+		<http:request method="GET" doc:name="GET/Products" doc:id="4cc91540-b2b2-4914-8efe-d0b7b08a793d" config-ref="HTTP_Request_configuration" path="/products"/>
+		<ee:transform doc:name="Transform Message" doc:id="d86b557e-b5aa-460e-a6f3-c5150a61bd63" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	products:{
+		(payload)
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getproductsbyname" doc:id="0b236e4c-cc2b-4997-8869-4c11a05322de" >
+		<http:request method="GET" doc:name="Request" doc:id="147c3d41-81a6-4f86-9bee-4beb4c2f6ce5" config-ref="HTTP_Request_configuration" path="/products/{pname}">
+			<http:uri-params ><![CDATA[#[{
+	pname: vars.pname as String
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message1" doc:id="fb2063a1-d43f-48f7-adeb-f7173d409d6a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	products:{
+		(payload)
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

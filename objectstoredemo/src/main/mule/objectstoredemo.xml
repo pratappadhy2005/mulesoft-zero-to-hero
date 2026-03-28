@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<os:object-store name="myobjectstore" doc:name="Object store" doc:id="4f9b0e72-4237-4fc1-93a1-c90abc983775"/>
+	<flow name="storeflow" doc:id="13714fbc-952f-41ec-ac76-353bcd0814b6" >
+		<http:listener doc:name="Listener" doc:id="781ca860-b740-4ffb-941b-544013c866b4" config-ref="HTTP_Listener_config" path="/store"/>
+		<os:store doc:name="Store" doc:id="ce186213-fbf9-4858-9a98-f9ee9d4f7fe3" key="#[attributes.queryParams.key]" objectStore="myobjectstore">
+			<os:value ><![CDATA[#[attributes.queryParams.value]]]></os:value>
+		</os:store>
+		<set-payload value="Data stored in object store" doc:name="Set Payload" doc:id="89777d2d-65a9-4882-a2a9-d426e3e7c90a" />
+	</flow>
+	<flow name="retrieveflow" doc:id="9a2d104d-810e-44fe-97e3-8060578494a5" >
+		<http:listener doc:name="Listener" doc:id="15cd578d-444a-4dff-b3fb-3d908d744c9f" config-ref="HTTP_Listener_config" path="/retrieve"/>
+		<os:retrieve doc:name="Retrieve" doc:id="080bd80f-e302-4bb5-9863-13034894bbc9" key="#[attributes.queryParams.key]" objectStore="myobjectstore">
+			<os:default-value ><![CDATA[No Such Key]]></os:default-value>
+		</os:retrieve>
+	</flow>
+</mule>
