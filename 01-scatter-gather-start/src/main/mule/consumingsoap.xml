@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="7f6ebac0-0d88-40c0-83d8-dc00e2518308" >
+		<wsc:connection wsdlLocation="products.wsdl" service="ProductServicePortService" port="ProductServicePortSoap11" address="http://localhost:6060/ws" >
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
+		</wsc:connection>
+	</wsc:config>
+	<flow name="soap-getallproduct" doc:id="1a8e2856-694a-4c64-a8a3-9ef1222d027a" >
+		<parse-template doc:name="Parse Template" doc:id="b5c0de6c-c20a-4f0d-a57e-f69ab7c5131c" location="getallproducts.xml"/>
+		<wsc:consume doc:name="Consume" doc:id="8c71e29d-302e-47b9-84a8-6733d2e2e398" config-ref="Web_Service_Consumer_Config" operation="getAllProducts"/>
+		<ee:transform doc:name="Transform Message" doc:id="780c9ec3-8835-4755-b67b-ac03ca6a2ce4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0ns ns0 http//way2learnonline.com/domain
+
+output application/java
+---
+payload.body.ns0#getAllProductsResponse.products.*product]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

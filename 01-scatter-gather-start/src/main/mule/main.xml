@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="0cf4f693-a722-4fc8-a3ab-ee481056c182" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="mainFlow" doc:id="e1c0fce2-9564-4fe5-9aa7-958bea4c25a3" >
+		<http:listener doc:name="Listener" doc:id="4e74ebd0-dc14-4cda-bb4b-d8934a70a1f1" config-ref="HTTP_Listener_config" path="/all"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="b664d7ca-0e32-49a0-93ec-ff2bd65274fb" >
+			<route >
+				<flow-ref doc:name="DB Flow Reference" doc:id="e5534288-e978-44c8-a596-7ea3e96d028a" name="databaseendpointFlow"/>
+			</route>
+			<route >
+				<flow-ref doc:name="REST Flow Reference" doc:id="96293cb0-014d-412b-a40b-243e29d527b3" name="rest-getallproducts"/>
+			</route>
+			<route >
+				<flow-ref doc:name="SOAP Flow Reference" doc:id="92ab0351-5cf6-43d2-9f54-ce3a838060de" name="soap-getallproduct"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="590499d4-4295-4137-8d9b-b68343525aab" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten (payload..payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
