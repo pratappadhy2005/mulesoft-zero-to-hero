@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d42e6726-34a6-48ec-b47f-d6e98b8be6a2" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="dataweave-zeo-to-heroFlow1" doc:id="395c1451-13ad-46b6-96d4-fd2fe42712dd" >
+		<http:listener doc:name="Listener" doc:id="455505f9-c57d-430b-86d7-05cee983d09c" config-ref="HTTP_Listener_config" path="/transform"/>
+		<ee:transform doc:name="Transform Message" doc:id="78b468cd-387f-4ed6-a630-b148c477818c" >
+			<ee:message >
+				<ee:set-payload resource="productxml.dwl" />
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable resource="pname.dwl" variableName="pname" />
+				<ee:set-variable resource="price.dwl" variableName="pprice" />
+			</ee:variables>
+		</ee:transform>
+	</flow>
 	<flow name="dataweave-zeo-to-heroFlow" doc:id="42024fcb-4c92-4332-beaf-8ab82ff6d6b1" >
 		<ee:transform doc:name="Transform Message" doc:id="d4898034-6826-47d1-b80b-d1acea2d2d0d" >
 			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/dw
-
-var obj1= {
-	one : "1",
-	two: "2"
-}
-
-var obj2= {
-	one : "1",
-	two: "2"
-}
-
-var objArr = [obj1, obj2]
-
-var numbers = [1, 'abc',33,11]
----
-obj1 - 'two']]></ee:set-payload>
+				<ee:set-payload resource="basics.dwl" />
 			</ee:message>
 		</ee:transform>
 	</flow>

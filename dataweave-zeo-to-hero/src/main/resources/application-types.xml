@@ -4,12 +4,39 @@
     <types:type name="Employees" format="xml">
       <types:example format="xml" element="Employees" location="examples/Employees.xml"/>
     </types:type>
+    <types:type name="productjson" format="json">
+      <types:shape format="weave" example="examples/product.json"><![CDATA[%dw 2.0
+
+type productjson = {|
+  productId: Number {"typeId": "int"}, 
+  name: String, 
+  description: String, 
+  originalPrice: Number {"typeId": "int"}, 
+  offer: {|
+    discountPercentage: Number {"typeId": "int"}, 
+    offerValidUntil: Number {"typeId": "double"}
+  |}, 
+  brandName: String, 
+  images: Array<String>
+|} {"example": "{\\\"productId\\\":1,\\\"name\\\":\\\"Hp Pavilion laptop\\\",\\\"description\\\":\\\"Hp Laptop \\\",\\\"originalPrice\\\":1000,\\\"offer\\\":{\\\"discountPercentage\\\":25,\\\"offerValidUntil\\\":1467105373745},\\\"brandName\\\":\\\"HP\\\",\\\"images\\\":[\\\"image1.jpeg\\\",\\\"image2.jpeg\\\",\\\"image3.jpeg\\\"]}"}
+
+]]></types:shape>
+    </types:type>
   </types:catalog>
   <types:enrichment select="#9427c5ba-436e-44ee-aa1c-d3a3968c490e">
     <types:processor-declaration>
       <types:input-event>
         <types:message>
           <types:payload type="Employees"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#78b468cd-387f-4ed6-a630-b148c477818c">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="productjson"/>
         </types:message>
       </types:input-event>
     </types:processor-declaration>
