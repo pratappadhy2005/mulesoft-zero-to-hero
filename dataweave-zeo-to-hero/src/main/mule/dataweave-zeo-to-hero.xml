@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="dataweave-zeo-to-heroFlow" doc:id="42024fcb-4c92-4332-beaf-8ab82ff6d6b1" >
+		<ee:transform doc:name="Transform Message" doc:id="d4898034-6826-47d1-b80b-d1acea2d2d0d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/dw
+
+var obj1= {
+	one : "1",
+	two: "2"
+}
+
+var obj2= {
+	one : "1",
+	two: "2"
+}
+
+var objArr = [obj1, obj2]
+
+var numbers = [1, 'abc',33,11]
+---
+obj1 - 'two']]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
