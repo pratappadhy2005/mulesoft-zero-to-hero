@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	 xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	 xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b8bad242-743d-4595-a3d0-c477085d5538" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="351e7c1c-2f5c-4e99-bdef-56663705ee20" />
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="9aaa235d-ec31-4fca-bf47-8e4868a05d06" >
+		<wsc:connection wsdlLocation="products.wsdl" service="ProductServicePortService" port="ProductServicePortSoap11" address="http://localhost:6060/ws" />
+	</wsc:config>
+	<flow name="getproductsbyname" doc:id="d954f7f3-18a7-4285-a430-eaa9a82e9466" >
+		<wsc:consume operation="getProductsByName" config-ref="Web_Service_Consumer_Config" doc:name="Consume" doc:id="4f535350-6c55-40d9-bb10-93282d305486">
+		</wsc:consume>
+		<logger level="INFO" doc:name="Logger" doc:id="b45dbcf6-8ee9-4d00-84a5-28a42d9b8d8e" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="0d0c39a3-0e01-47d8-90cc-699948f41303" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>  
+	</flow>
+	<flow name="ValidateAndTransform" doc:id="65e8fa3b-488e-433f-bbe5-9f29d816e89b" >
+		<validation:is-true doc:name="Is true" doc:id="e268bfe3-66f5-40cb-820c-a341ffa6f24c" config-ref="Validation_Config" expression="#[['Hp','Mac'] contains  vars.productname]" message="Invalid productname!!!!!!!!!!!!!!!!!!!!!!!" />
+		<ee:transform doc:name="Transform Message" doc:id="9940b230-b383-43c1-a7a1-29c6c6009a55">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http//way2learnonline.com/domain
+---
+{
+	ns0#getProductsByNameRequest: {
+		name: vars.productname as String
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="getproductsbyname" doc:id="bb84052b-0b6b-42fe-8a0a-84b1625045ce" name="getproductsbyname"/>
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="d446ae54-82e8-4a0f-b51b-9f497ee01495" >
+				<logger level="INFO" doc:name="Logger" doc:id="d30e56ca-87f3-4634-b460-d1fb8e6e29eb" message="Inside ValidateAndTransform ===inside error continue flow"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="mainflow" doc:id="ee659804-71de-4bec-b8b8-508498da5f77" >
+		<http:listener doc:name="Listener" doc:id="ac18afed-01f7-4ca0-88f0-6823e615a651" config-ref="HTTP_Listener_config" path="/error">
+			<http:error-response >
+				<http:body ><![CDATA[#[output text/json --- error.errorType]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<set-variable value="#[attributes.queryParams.productname]" doc:name="Set Variable" doc:id="60edcb8f-d36c-468b-90cf-25a1cb6e4acb" variableName="productname"/>
+		<flow-ref doc:name="ValidateAndTransform" doc:id="ec1054d2-5bce-4ecf-bf53-bf8c3bb49f60" name="ValidateAndTransform"/>
+		<logger level="INFO" doc:name="Logger" doc:id="f52a19db-0726-4478-a10b-50bea1955787" message="#['in main flow After Getting all products']"/>
+	</flow>
+</mule>
