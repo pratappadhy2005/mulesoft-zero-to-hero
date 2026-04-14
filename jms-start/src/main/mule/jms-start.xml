@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e3da0e5b-a86a-43af-beb6-60cd1a367410" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<jms:config name="JMS_Config" doc:name="JMS Config" doc:id="72b86e3f-b5fa-40ea-a2e7-d732611a9ec3" >
+		<jms:active-mq-connection >
+			<jms:factory-configuration brokerUrl="tcp://localhost:61616" />
+		</jms:active-mq-connection>
+	</jms:config>
+	<flow name="jms-startFlow1" doc:id="f6343cb6-25a9-459f-8329-af195af95328" >
+		<jms:listener doc:name="On New Message" doc:id="6cb42aa0-4958-446a-8748-e607bb6f8aba" destination="inq" config-ref="JMS_Config" selector="JMSPriority=8"/>
+		<set-payload value="#[payload ++ 'Response']" doc:name="Set Payload" doc:id="aaea90d7-da3f-4355-be89-ec304ebe9697" />
+		<logger level="INFO" doc:name="Logger" doc:id="40eb0e9f-c418-4694-8467-5c0d2dd4866d" message="'Hello Mule Message Consumed from JMS'"/>
+	</flow>
+	<flow name="jms-startFlow" doc:id="301e4777-0b81-401c-b9b4-ccf2dcb5aa93" >
+		<http:listener doc:name="Listener" doc:id="e4ad0eb2-6d9a-4696-b16a-b9adf4383de3" config-ref="HTTP_Listener_config" path="/jmssend"/>
+		<jms:publish-consume doc:name="Publish consume" doc:id="d449d842-8ea6-43a4-bf36-7b2a06436915" config-ref="JMS_Config" destination="inq">
+			<jms:message >
+				<jms:reply-to destination="myreplyqueue" />
+			</jms:message>
+		</jms:publish-consume>
+		<logger level="INFO" doc:name="Logger" doc:id="608bd1da-4efe-4c34-8f33-85baf9be76d3" message="#[payload]"/>
+	</flow>
+</mule>
