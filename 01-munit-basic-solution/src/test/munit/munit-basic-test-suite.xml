@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="munit-basic-test-suite.xml" />
+	<munit:before-test name="munit-basic-test-suiteBefore_Test" doc:id="7e5c1bae-cd22-4e6a-9b1e-4faadbf7d0ad" >
+		<logger level="INFO" doc:name="Logger" doc:id="4aeda143-7f1b-47e4-8123-396f75a7b710" message="Inside logger"/>
+		<munit:set-event doc:name="Set Event" doc:id="623619a5-b1e7-4b9a-86b8-8915fc522c47">
+				<munit:attributes value="#[{queryParams: {id:1}}]" />
+			</munit:set-event>
+	</munit:before-test>
+	<munit:test name="munit-basic-test-suiteTest" doc:id="62b16e66-147b-4898-81d8-62731a1527bf" >
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="1d5d13f9-3920-4b3e-96d9-98ecf8909085" name="productsbyidFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="c04fdb6b-01b9-495d-a84e-0f7ae790abb5" processor="db:select" times="2">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Selectbyid" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<flow name="munit-basic-test-suiteFlow" doc:id="16f7f431-356b-4e92-9baa-7a777432599d" >
+	</flow>
+	<munit:test name="munit-basic-test-suite-productsbyidFlowTest" doc:id="07644aeb-70d4-45ac-b427-abfc6ea5d846" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="0062bd9d-a865-4f7e-9be7-c065278d1b6b" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Selectbyid" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[[&#10;	{&#10;    "id": 1,&#10;    "name": "Hp Pavilion laptop",&#10;    "brand": "HP",&#10;    "offerPrice": 1000.0,&#10;    "price": 1000.0&#10;}&#10;]]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:spy doc:name="Spy" doc:id="f9b0ba81-03e6-47ea-927a-936d0244f616" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="transformselectById" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="transformselectById" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="transformselectById" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="transformselectById" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="transformselectById" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert expression" doc:id="25298d19-a20b-4870-94a6-20a4dc31aaa2" >
+						<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalTo([{
+    "id": 1,
+    "name": "Hp Pavilion laptop",
+    "brand": "HP",
+    "offerPrice": 1000.0,
+    "price": 1000.0
+}])]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert expression" doc:id="f1218b62-5180-4f53-835f-563a233eeea7" >
+						<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalTo({
+    "id": 1,
+    "name": "Hp Pavilion laptop",
+    "brand": "HP",
+    "offerPrice": 1000.0,
+    "price": 1000.0
+})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to productsbyidFlow" doc:id="35c51578-94be-4160-8cec-ddfb2e017ae8" name="productsbyidFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="d9a9c9a2-79c7-4e41-9c6b-c352bd8980a0" >
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalTo({
+    "id": 1,
+    "name": "Hp Pavilion laptop",
+    "brand": "HP",
+    "offerPrice": 1000.0,
+    "price": 1000.0
+})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

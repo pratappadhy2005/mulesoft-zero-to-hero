@@ -1,0 +1,12 @@
+%dw 2.0
+
+type auto_2e3b2466_26a7_48ec_acf5_69f971077c82_Output_Payload = {|
+  product_id: Number, 
+  brand_name?: String, 
+  description?: String, 
+  name?: String, 
+  offer_price: Number, 
+  offer_valid_until?: Date, 
+  original_price: Number
+|} | {|  |}
+
