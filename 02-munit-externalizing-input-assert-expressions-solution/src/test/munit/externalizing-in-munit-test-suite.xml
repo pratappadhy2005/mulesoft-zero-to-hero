@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="munit-basic-test-suite.xml" />
+	<munit:test name="getproductbyid-withexistingid" doc:id="38fc2b91-788e-4c18-8ca1-f804dfb8c401" description="Test">
+		<munit:execution> 
+			<munit:set-event doc:name="Set Event" doc:id="f8a0ccd1-ecda-47fb-98c3-316294eea20a" >
+				<munit:attributes value='#[readUrl("classpath://getproductbyid/getproductbyid-withexisting-id-setevent-attributes.dwl")]' />
+			</munit:set-event>
+			<flow-ref doc:name="mainflow" doc:id="70d8351a-87aa-4d59-bf58-f0ab5dbf1ec8" name="mainflow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="058aa891-5024-4f4a-8aad-5f39eb9716d6" message="Name is not as expected">
+				<munit-tools:that ><![CDATA[#[import  getproductbyid::getproductbyid_withexisting_id_assert_response
+ ---
+getproductbyid_withexisting_id_assert_response::main({payload:payload,attributes:attributes,vars:vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test> 
+
+
+</mule>
