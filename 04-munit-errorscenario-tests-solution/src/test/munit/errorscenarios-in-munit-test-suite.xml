@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="errorscenarios-in-munit-test-suite.xml" />
+	<munit:test name="getproductbyid-invalidid" doc:id="a4ced45d-1f5a-47b9-a7cb-a4180e36034d" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="9ac91ea8-a6b0-402f-9751-8bc5e87f2d03" >
+				<munit:attributes value='#[readUrl("classpath://getproductbyid/invalidid/event-attributes.dwl")]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to mainflow" doc:id="ae96723d-1666-4af0-b1a7-b06f0b3707e6" name="mainflow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="0a22619c-e4b6-421b-b1da-d88911f4dc04" >
+				<munit-tools:that ><![CDATA[#[import getproductbyid::invalidid::assert_payload
+ ---
+assert_payload::main({payload:payload,attributes:attributes,vars:vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="getproductbyid-db-connectivity" doc:id="71f22cb0-87ba-4d7c-a607-7a690d6eca35" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="12655f81-82d7-427b-a9cf-cba809c6b3f8" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Selectbyid" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="DB:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="eb9748e3-8aa1-49ce-80e5-dbb34389deca" >
+				<munit:attributes value='#[readUrl("classpath://getproductbyid/dbconnectivity/event-attributes.dwl")]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to mainflow" doc:id="0a470309-aa6c-4ad8-8361-da1e7ff400ef" name="mainflow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="4a86bbac-7d41-419e-aa91-a89001e71ce0" >
+				<munit-tools:that ><![CDATA[#[import getproductbyid::dbconnectivity::assert_payload
+ ---
+assert_payload::main({payload:payload,attributes:attributes,vars:vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="getproductbyid-any" doc:id="da02a7e7-f826-40fd-a0bb-7b6ecb4bab8f" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="5c5f22c6-3c2b-4e21-926a-f508cc83ab08" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Selectbyid" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="MULE:ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="29af1055-9241-4313-8107-742a893cf66b" >
+				<munit:attributes value='#[readUrl("classpath://getproductbyid/anyerror/event-attributes.dwl")]' />
+			</munit:set-event>
+			<try doc:name="Try" doc:id="d84f628a-83ae-4563-a023-cf99581fd99b" >
+				<flow-ref doc:name="Flow-ref to mainflow" doc:id="f8df9ce3-f2cd-4e59-8e1d-949d095538fd" name="mainflow" />
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="9668aaf7-e6dc-4913-b988-ae0ca19fe0ac" >
+						<logger level="INFO" doc:name="Logger" doc:id="1de977f4-0eee-4cb2-bcea-7f2a1223bfcc" message="Inside on error continue of try scope"/>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="5641532e-94e9-40d1-989b-e7f63cd05a23" >
+				<munit-tools:that ><![CDATA[#[import getproductbyid::anyerror::assert_payload
+ ---
+assert_payload::main({payload:payload,attributes:attributes,vars:vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
